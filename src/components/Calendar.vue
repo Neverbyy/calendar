@@ -6,6 +6,11 @@ const props = defineProps({
 		type: String,
 		default: '',
 	},
+	locale: {
+		type: String,
+		default: 'ru',
+		validator: (value) => ['ru', 'en'].includes(value),
+	},
 })
 
 const emit = defineEmits(['select'])
@@ -14,22 +19,43 @@ const today = new Date()
 const currentMonth = ref(today.getMonth())
 const currentYear = ref(today.getFullYear())
 
-const monthNames = [
-	'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
-	'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь',
-]
+const locales = {
+	ru: {
+		months: [
+			'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+			'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь',
+		],
+		weekDays: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
+		navLabels: {
+			prev: 'Предыдущий месяц',
+			next: 'Следующий месяц',
+		},
+	},
+	en: {
+		months: [
+			'January', 'February', 'March', 'April', 'May', 'June',
+			'July', 'August', 'September', 'October', 'November', 'December',
+		],
+		weekDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+		navLabels: {
+			prev: 'Previous month',
+			next: 'Next month',
+		},
+	},
+}
 
-const weekDayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
+const currentLocale = computed(() => locales[props.locale] || locales.ru)
 
-const Title = computed(() => `${monthNames[currentMonth.value]} ${currentYear.value}`)
+const Title = computed(() => `${currentLocale.value.months[currentMonth.value]} ${currentYear.value}`)
 
-const formatDate = (date) => `${date.getFullYear()}-${(date.getMonth() + 1)}-${(date.getDate())}`
+const formatDate = (date) => `${(date.getDate())}-${(date.getMonth() + 1)}-${date.getFullYear()}`
+
 const selectedDate = ref(props.date || new Date(today.getFullYear(), today.getMonth(), today.getDate()))
 
 const calendarDays = computed(() => {
 	const firstOfMonth = new Date(currentYear.value, currentMonth.value, 1)
 	const start = (firstOfMonth.getDay() + 6) % 7 
-    const totalCells = 42 // 6 недель по 7 дней
+	const totalCells = 42 // 6 недель по 7 дней
 	const days = []
 
 	for (let i = 0; i < totalCells; i++) {
@@ -44,7 +70,7 @@ const calendarDays = computed(() => {
 				date.getFullYear() === today.getFullYear() &&
 				date.getMonth() === today.getMonth() &&
 				date.getDate() === today.getDate(),
-            isSelected:
+			isSelected:
 				date.getFullYear() === selectedDate.value.getFullYear() &&
 				date.getMonth() === selectedDate.value.getMonth() &&
 				date.getDate() === selectedDate.value.getDate(),
@@ -58,7 +84,6 @@ const handlePrevMonth = () => {
 	if (currentMonth.value === 0) {
 		currentMonth.value = 11
 		currentYear.value -= 1
-
 		return
 	}
 	currentMonth.value -= 1
@@ -68,7 +93,6 @@ const handleNextMonth = () => {
 	if (currentMonth.value === 11) {
 		currentMonth.value = 0
 		currentYear.value += 1
-
 		return
 	}
 	currentMonth.value += 1
@@ -78,7 +102,7 @@ const handleSelectDay = (day) => {
 	const next = new Date(day.date)
 
 	// если клик по дню не текущего месяца — переключаемся на этот месяц
-    selectedDate.value = next
+	selectedDate.value = next
 	currentYear.value = next.getFullYear()
 	currentMonth.value = next.getMonth()
 
@@ -96,7 +120,7 @@ onMounted(() => {
 		<div class="calendar__nav">
 			<button
 				class="calendar__navBtn"
-				aria-label="Предыдущий месяц"
+				:aria-label="currentLocale.navLabels.prev"
 				@click="handlePrevMonth"
 			>
 				‹
@@ -104,7 +128,7 @@ onMounted(() => {
 			<div class="calendar__title"> {{ Title }}</div>
 			<button
 				class="calendar__navBtn"
-				aria-label="Следующий месяц"
+				:aria-label="currentLocale.navLabels.next"
 				@click="handleNextMonth"
 			>
 				›
@@ -112,27 +136,27 @@ onMounted(() => {
 		</div>
 
 		<div class="calendar__week">
-			<div v-for="d in weekDayNames" :key="d" class="calendar__weekDay">
+			<div v-for="d in currentLocale.weekDays" :key="d" class="calendar__weekDay">
 				{{ d }}
 			</div>
 		</div>
-			<div class="calendar__grid">
-				<div
-					v-for="day in calendarDays"
-					:key="day.key"
-					class="calendar__day"
-					:class="{
-						'calendar__day--muted': !day.inCurrentMonth,
-						'calendar__day--selected': day.isSelected,
-						'calendar__day--today': day.isToday && !day.isSelected,
-					}"
-					role="button"
-					tabindex="0"
-					@click="handleSelectDay(day)"
-				>
-					<span class="calendar__dayLabel">{{ day.label }}</span>
-				</div>
+		<div class="calendar__grid">
+			<div
+				v-for="day in calendarDays"
+				:key="day.key"
+				class="calendar__day"
+				:class="{
+					'calendar__day--muted': !day.inCurrentMonth,
+					'calendar__day--selected': day.isSelected,
+					'calendar__day--today': day.isToday && !day.isSelected,
+				}"
+				role="button"
+				tabindex="0"
+				@click="handleSelectDay(day)"
+			>
+				<span class="calendar__dayLabel">{{ day.label }}</span>
 			</div>
+		</div>
 	</div>
 </template>
 <style scoped lang="scss">
@@ -154,8 +178,8 @@ onMounted(() => {
 		transition: border-color .15s ease-in-out, background-color .15s ease-in-out;
 
 		&:hover { 
-            border-color: #6366f1; 
-        }
+			border-color: #6366f1; 
+		}
 	}
 
 	&__title {
@@ -193,26 +217,26 @@ onMounted(() => {
 		background: transparent;
 		transition: border-color .15s ease-in-out, background-color .15s ease-in-out, box-shadow .15s ease-in-out;
 		&:hover { 
-            border-color: #e5e7eb; 
-        }
+			border-color: #e5e7eb; 
+		}
 
 		&--muted { 
-            opacity: .5; 
-        }
-        
+			opacity: .5; 
+		}
+		
 		&--selected { 
-            box-shadow: 0 0 0 2px #6366f1 inset; 
-        }
+			box-shadow: 0 0 0 2px #6366f1 inset; 
+		}
 
 		&--today { 
-            background-color: #fef3c7; 
-        }
+			background-color: #fef3c7; 
+		}
 	}
 
 	&__dayLabel { 
-        display: block; 
-        text-align: center; 
-    }
+		display: block; 
+		text-align: center; 
+	}
 }
 </style>
 
