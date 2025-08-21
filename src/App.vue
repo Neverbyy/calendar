@@ -1,30 +1,58 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
+
+const now = new Date()
+
+const today = now.toLocaleDateString('ru-RU', {})
 </script>
 
 <template>
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
-  </div>
-  <HelloWorld msg="Vite + Vue" />
+	<div class="page">
+		<div class="page__container">
+			<h1 class="page__title">Календарь</h1>
+			<div class="page__selected">
+				<p class="page__selectedText">Выбранная дата: <span class="page__selectedValue">{{ today }}</span></p>
+			</div>
+		</div>
+	</div>
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+<style scoped lang="scss">
+.page {
+	min-height: 100vh;
+	width: 100%;
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
+	padding: 24px;
+
+	&__container { 
+		width: 100%; 
+		max-width: 640px; 
+	}
+
+	&__title { 
+		font-size: 24px; 
+		line-height: 32px; 
+		font-weight: 700; 
+		margin-bottom: 16px;
+		color: #000;
+	}
+
+	&__selected { 
+		margin-top: 16px; 
+	}
+
+	&__selectedText { 
+		font-size: 14px; 
+		line-height: 20px; 
+		color: #000;
+	}
+
+	&__selectedValue { 
+		font-weight: 600; 
+		color: #000; 
+	}
 }
 </style>
+
+
