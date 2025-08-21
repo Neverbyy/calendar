@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 const props = defineProps({
 	date: {
@@ -24,12 +24,13 @@ const weekDayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
 const Title = computed(() => `${monthNames[currentMonth.value]} ${currentYear.value}`)
 
 const formatDate = (date) => `${date.getFullYear()}-${(date.getMonth() + 1)}-${(date.getDate())}`
-
-const firstDayOfMonth = new Date(currentYear.value, currentMonth.value, 1)
+const selectedDate = ref(props.date || new Date(today.getFullYear(), today.getMonth(), today.getDate()))
 
 const calendarDays = computed(() => {
-	const start = (firstDayOfMonth.getDay() + 6) % 7
+	const firstOfMonth = new Date(currentYear.value, currentMonth.value, 1)
+	const start = (firstOfMonth.getDay() + 6) % 7 
 	const totalCells = 42 // 6 недель по 7 дней
+
 	const days = []
 
 	for (let i = 0; i < totalCells; i++) {
@@ -39,6 +40,14 @@ const calendarDays = computed(() => {
 			date,
 			label: date.getDate(),
 			inCurrentMonth: date.getMonth() === currentMonth.value,
+			isToday:
+				date.getFullYear() === today.getFullYear() &&
+				date.getMonth() === today.getMonth() &&
+				date.getDate() === today.getDate(),
+            isSelected:
+				date.getFullYear() === selectedDate.value.getFullYear() &&
+				date.getMonth() === selectedDate.value.getMonth() &&
+				date.getDate() === selectedDate.value.getDate(),
 		})
 	}
 
@@ -49,7 +58,6 @@ const handlePrevMonth = () => {
 	if (currentMonth.value === 0) {
 		currentMonth.value = 11
 		currentYear.value -= 1
-
 		return
 	}
 	currentMonth.value -= 1
@@ -59,15 +67,20 @@ const handleNextMonth = () => {
 	if (currentMonth.value === 11) {
 		currentMonth.value = 0
 		currentYear.value += 1
-        
 		return
 	}
 	currentMonth.value += 1
 }
 
 const handleSelectDay = (day) => {
-	emit('select', formatDate(day.date))
+    selectedDate.value = new Date(day.date)
+	emit('select', formatDate(selectedDate.value))
 }
+
+onMounted(() => {
+	// Отображаем выбранную дату (по умолчанию сегодняшнюю)
+	emit('select', formatDate(selectedDate.value))
+})
 </script>
 
 <template>
@@ -96,18 +109,22 @@ const handleSelectDay = (day) => {
 			</div>
 		</div>
 			<div class="calendar__grid">
-                <div
-				v-for="day in calendarDays"
-				:key="day.key"
-				class="calendar__day"
-				:class="{ 'calendar__day--muted': !day.inCurrentMonth }"
-				role="button"
-				tabindex="0"
-				@click="handleSelectDay(day)"
-			>
-				<span class="calendar__dayLabel">{{ day.label }}</span>
+				<div
+					v-for="day in calendarDays"
+					:key="day.key"
+					class="calendar__day"
+					:class="{
+						'calendar__day--muted': !day.inCurrentMonth,
+						'calendar__day--selected': day.isSelected,
+						'calendar__day--today': day.isToday && !day.isSelected,
+					}"
+					role="button"
+					tabindex="0"
+					@click="handleSelectDay(day)"
+				>
+					<span class="calendar__dayLabel">{{ day.label }}</span>
+				</div>
 			</div>
-		</div>
 	</div>
 </template>
 <style scoped lang="scss">
