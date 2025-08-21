@@ -8,8 +8,6 @@ const handleSelect = (date) => {
 	selectedDate.value = date
 }
 
-const now = new Date()
-const today = now.toLocaleDateString('ru-RU', {})
 </script>
 
 <template>
@@ -18,7 +16,7 @@ const today = now.toLocaleDateString('ru-RU', {})
 			<h1 class="page__title">Календарь</h1>
 			<Calendar @select="handleSelect" />
 			<div class="page__selected">
-				<p class="page__selectedText">Выбранная дата: <span class="page__selectedValue">{{ selectedDate || today }}</span></p>
+				<p class="page__selectedText">Выбранная дата: <span class="page__selectedValue">{{ selectedDate }}</span></p>
 			</div>
 		</div>
 	</div>
