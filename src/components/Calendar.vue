@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 const props = defineProps({
 	date: {
@@ -20,6 +20,8 @@ const monthNames = [
 ]
 
 const weekDayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
+
+const Title = computed(() => `${monthNames[currentMonth.value]} ${currentYear.value}`)
 
 const handlePrevMonth = () => {
 	if (currentMonth.value === 0) {
@@ -46,22 +48,33 @@ const handleNextMonth = () => {
 		<div class="calendar__nav">
 			<button
 				class="calendar__navBtn"
+				aria-label="Предыдущий месяц"
 				@click="handlePrevMonth"
 			>
 				‹
 			</button>
-			<div class="calendar__title">Temp title</div>
+			<div class="calendar__title"> {{ Title }}</div>
 			<button
 				class="calendar__navBtn"
+				aria-label="Следующий месяц"
 				@click="handleNextMonth"
 			>
 				›
 			</button>
 		</div>
 
-	</div>
-</template>
+		<div class="calendar__week">
+			<div v-for="d in weekDayNames" :key="d" class="calendar__weekDay">
+				{{ d }}
+			</div>
+		</div>
 
+		<div class="calendar__grid">
+			<div>
+			</div>
+        </div>
+    </div>
+</template>
 <style scoped lang="scss">
 .calendar {
 	width: 100%;
@@ -88,6 +101,20 @@ const handleNextMonth = () => {
 	&__title {
 		font-size: 18px;
 		font-weight: 600;
+	}
+
+	&__week {
+		display: grid;
+		grid-template-columns: repeat(7, 1fr);
+		gap: 4px;
+		margin-bottom: 4px;
+	}
+
+	&__weekDay {
+		text-align: center;
+		font-size: 12px;
+		font-weight: 600;
+		padding: 4px 0;
 	}
 
 	
