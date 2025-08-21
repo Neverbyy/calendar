@@ -29,8 +29,7 @@ const selectedDate = ref(props.date || new Date(today.getFullYear(), today.getMo
 const calendarDays = computed(() => {
 	const firstOfMonth = new Date(currentYear.value, currentMonth.value, 1)
 	const start = (firstOfMonth.getDay() + 6) % 7 
-	const totalCells = 42 // 6 недель по 7 дней
-
+    const totalCells = 42 // 6 недель по 7 дней
 	const days = []
 
 	for (let i = 0; i < totalCells; i++) {
@@ -40,6 +39,7 @@ const calendarDays = computed(() => {
 			date,
 			label: date.getDate(),
 			inCurrentMonth: date.getMonth() === currentMonth.value,
+
 			isToday:
 				date.getFullYear() === today.getFullYear() &&
 				date.getMonth() === today.getMonth() &&
@@ -58,6 +58,7 @@ const handlePrevMonth = () => {
 	if (currentMonth.value === 0) {
 		currentMonth.value = 11
 		currentYear.value -= 1
+
 		return
 	}
 	currentMonth.value -= 1
@@ -67,14 +68,21 @@ const handleNextMonth = () => {
 	if (currentMonth.value === 11) {
 		currentMonth.value = 0
 		currentYear.value += 1
+
 		return
 	}
 	currentMonth.value += 1
 }
 
 const handleSelectDay = (day) => {
-    selectedDate.value = new Date(day.date)
-	emit('select', formatDate(selectedDate.value))
+	const next = new Date(day.date)
+
+	// если клик по дню не текущего месяца — переключаемся на этот месяц
+    selectedDate.value = next
+	currentYear.value = next.getFullYear()
+	currentMonth.value = next.getMonth()
+
+	emit('select', formatDate(next))
 }
 
 onMounted(() => {
@@ -184,14 +192,27 @@ onMounted(() => {
 		cursor: pointer;
 		background: transparent;
 		transition: border-color .15s ease-in-out, background-color .15s ease-in-out, box-shadow .15s ease-in-out;
-		&:hover { border-color: #e5e7eb; }
+		&:hover { 
+            border-color: #e5e7eb; 
+        }
 
-		&--muted { opacity: .5; }
-		&--selected { box-shadow: 0 0 0 2px #6366f1 inset; }
-		&--today { background-color: #fef3c7; }
+		&--muted { 
+            opacity: .5; 
+        }
+        
+		&--selected { 
+            box-shadow: 0 0 0 2px #6366f1 inset; 
+        }
+
+		&--today { 
+            background-color: #fef3c7; 
+        }
 	}
 
-	&__dayLabel { display: block; text-align: center; }
+	&__dayLabel { 
+        display: block; 
+        text-align: center; 
+    }
 }
 </style>
 
